@@ -1,0 +1,42 @@
+{
+  "name": "oniyi-http-plugin-auth-type-injector",
+  "version": "0.0.1",
+  "description": "Plugin responsible for injecting auth type in url",
+  "license": "UNLICENSED",
+  "author": {
+    "name": "Andreja Jevtic",
+    "email": "andjevtic@gmail.com"
+  },
+  "main": "lib/index.js",
+  "keywords": [
+    "oniyi",
+    "http",
+    "plugin",
+    "auth",
+    "injector"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/gisag/oniyi-http-plugin-auth-type-injector.git"
+  },
+  "scripts": {
+    "test": "ava --verbose",
+    "coverage": "nyc npm run test && nyc report --reporter=text-lcov > coverage.lcov"
+  },
+  "dependencies": {
+    "async": "2.4.0",
+    "lodash": "4.17.4",
+    "mustache": "^2.3.0",
+    "oniyi-logger": "1.0.0"
+  },
+  "devDependencies": {
+    "eslint": "3.15.0",
+    "eslint-config-oniyi": "4.4.0",
+    "ava": "^0.18.2",
+    "babel-eslint": "^7.1.1",
+    "dotenv": "^4.0.0",
+    "eslint-plugin-ava": "^4.2.0",
+    "nock": "^9.0.13",
+    "nyc": "^10.1.2"
+  }
+}

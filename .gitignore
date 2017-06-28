@@ -1,0 +1,6 @@
+/coverage
+/coverage.lcov
+/node_modules
+/.nyc_output
+.idea
+/.project
