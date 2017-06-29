@@ -6,9 +6,6 @@
 const test = require('ava');
 const _ = require('lodash');
 
-// configure dotenv
-require('dotenv').config();
-
 // internal modules
 const authTypePlugin = require('../lib');
 

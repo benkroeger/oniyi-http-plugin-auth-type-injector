@@ -32,11 +32,9 @@
   "devDependencies": {
     "eslint": "3.15.0",
     "eslint-config-oniyi": "4.4.0",
-    "ava": "^0.18.2",
+    "ava": "^0.20.0",
     "babel-eslint": "^7.1.1",
-    "dotenv": "^4.0.0",
     "eslint-plugin-ava": "^4.2.0",
-    "nock": "^9.0.13",
     "nyc": "^10.1.2"
   }
 }
