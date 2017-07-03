@@ -35,7 +35,8 @@ const defaultTypeToNameMap = {
 
 It is important to follow couple of conventions when defining a request uri:
 
-    **-- convention 1 --**
+   -- **convention 1** --
+   
 ```js
 const requestOptions = {
   auth: {},
@@ -56,7 +57,8 @@ const requestOptions = {
 The logic behind this plugin is to only format template Strings if any was found. Otherwise it will return parsed uri without
 any changes.
 
-    **-- convention 2 --**
+   -- **convention 2** --
+   
 ```js
 const requestOptions = {
   auth: {},
@@ -69,7 +71,8 @@ const requestOptions = {
 ```
 You are able to add multiple templates into uri (`'pathID',...`), as long as you define their values within `requestOptions`.
 
-    **-- convention 3 --**
+   -- **convention 3** --
+   
 ```js
 const requestOptions = {
   applyToUrl: true,
@@ -93,7 +96,7 @@ const requestOptions = {
 }
 ```
 
-    **-- convention 4 --**
+   -- **convention 4** --
 
 It is recommended to use this plugin in combination with `oniyi-http-plugin-credentials`, since it resolves `authType`
 which is being used by this plugin.
