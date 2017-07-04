@@ -48,10 +48,11 @@ const requestOptions = {
 ```
 
 `{ authType }` can be placed anywhere within uri/url. Valid template string:
- 1. {authType}
- 2. {authType }
- 3. { authType}
- 4. { authType }
+
+ 1. {**authType**}
+ 2. {**authType** }
+ 3. { **authType**}
+ 4. { **authType** }
 
 `{authType}` does not have to be used within every single http request in service. 
 The logic behind this plugin is to only format template Strings if any was found. Otherwise it will return parsed uri without
