@@ -81,7 +81,9 @@ const requestOptions = {
   }
 ```
 These are the default values.
+
 Set `applyToUrl` to `false` if there is no need to apply this plugin on an `uri`.
+
 Set `applyToQueryString` to `true` if formatting query string ( 'qs' ) is required. 
 ```js
 const requestOptions = {
