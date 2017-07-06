@@ -10,19 +10,24 @@ $ npm install --save oniyi-http-plugin-format-url-template
 ## Usage
 ```js
 const OniyiHttpClient = require('oniyi-http-client');
-const oniyiHttpPluginAuthType = require('oniyi-http-plugin-format-url-template');
+const oniyiHttpPluginUrlTemplate = require('oniyi-http-plugin-format-url-template');
 
 const clientOptions = {};
 const httpClient = new OniyiHttpClient(clientOptions);
 
-const typeToNameMap = {
-  oauth: 'myAuthType', // this line overrides default 'myAuthType' type name, and 'myAuthType' will be injected into url if requested
+const pluginOptions = {
+  typeToNameMap: {
+    oauth: 'myAuthType', // this line overrides default 'myAuthType' type name, and 'myAuthType' will be injected into url if requested
+  },
+  formatUrlTemplate: {
+    applyToQueryString: true,
+  },
 };
 
-httpClient.use(oniyiHttpPluginAuthType({ typeToNameMap }));
+httpClient.use(oniyiHttpPluginUrlTemplate(pluginOptions));
 ```
 
-This is default mapping object, it can be overridden by providing custom 'typeToNameMap' constant as shown above
+This is the default mapping object, it can be overridden by providing custom 'typeToNameMap' as shown above
 
 ```js
 const defaultTypeToNameMap = {
@@ -30,6 +35,14 @@ const defaultTypeToNameMap = {
   basic: 'basic',
   saml: 'form',
   cookies: 'form',
+};
+```
+These are the default format url template options, it can be overridden by providing custom 'formatUrlTemplate' as shown above
+
+```js
+const defaultFormatUrlTemplate = {
+  applyToUrl: true,
+  applyToQueryString: false,
 };
 ```
 ## Conventions
@@ -75,21 +88,41 @@ You are able to add multiple templates into uri (`'pathID',...`), as long as you
 
    -- **convention 3** --
    
+Format url template options can be applied on two levels:
+   
+   1. When initializing plugin:
+   
+```js
+const pluginOptions = {
+  typeToNameMap: {},
+  formatUrlTemplate: {
+    applyToUrl: false,
+  },
+};
+
+httpClient.use(oniyiHttpPluginAuthType(pluginOptions));
+```
+
+   2. When configuring http request:
+
 ```js
 const requestOptions = {
+  qs: {},
+  uri: 'my/custom/path/without/template',
   plugins: {
     formatUrlTemplate: {
-        applyToUrl: true,
-        applyToQueryString: false,
+      applyToUrl: false,
     },
   },
 }
 ```
-These are the default values.
 
 Set `applyToUrl` to `false` if there is no need to apply this plugin on an `uri`.
 
 Set `applyToQueryString` to `true` if formatting query string ( 'qs' ) is required. 
+
+Setup under 1. overwrites the default `formatUrlTempalte` options, while setup under 2. overwrites initial `pluginOptions` setup
+
 ```js
 const requestOptions = {
   auth: {},
@@ -102,7 +135,7 @@ const requestOptions = {
       applyToQueryString: true,
     },
   },
-  uri: 'my/custom/{ authType }/path',
+  uri: 'my/custom/path',
   psTemplate: '15',
 }
 ```
