@@ -21,7 +21,7 @@
   },
   "scripts": {
     "test": "ava --verbose",
-    "coverage": "nyc npm run test && nyc report --reporter=text-lcov > coverage.lcov"
+    "coverage": "nyc npm run test && nyc report --reporter=html"
   },
   "dependencies": {
     "async": "2.4.0",

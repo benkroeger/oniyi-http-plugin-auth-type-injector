@@ -70,7 +70,7 @@ test('validate {formatUrlTemplate} values and type', (t) => {
   t.true(_.isString(name));
   t.true(_.isFunction(load));
 
-  t.is(name, 'inject-auth-type');
+  t.is(name, 'format-url-template');
   t.is(load.length, 3, 'there should be 3 arguments in {load} function');
 });
 
@@ -101,7 +101,11 @@ test.cb('validation when {authType } and { test} template provided, "qs" { test 
     uri: uriString,
     authType: 'basic',
     mockParam: 'injectedMockParam',
-    applyToQueryString: true,
+    plugins: {
+      formatUrlTemplate: {
+        applyToQueryString: true,
+      },
+    },
   };
   load(null, params, (err, modifiedParams) => {
     const { uri: { href: originalPath }, authType, mockParam, qs: originalQs } = params;
@@ -127,7 +131,11 @@ test.cb('validation when {userid2} && {userid3} template provided, multiple "qs"
   const params = {
     uri,
     qs: multipleQs,
-    applyToQueryString: true,
+    plugins: {
+      formatUrlTemplate: {
+        applyToQueryString: true,
+      },
+    },
     mockUserid2: 'mappedMockedUserid2',
     mockUserid3: 'mappedMockedUserid3',
     authType: 'basic',
@@ -212,7 +220,11 @@ test.cb('validation when "qs" is not provided', (t) => {
   const { load, uri } = t.context;
   const params = {
     uri,
-    applyToQueryString: true,
+    plugins: {
+      formatUrlTemplate: {
+        applyToQueryString: true,
+      },
+    },
     mockTemplate: 'mockMappedTemplate',
   };
   load(null, params, (err, modifiedParams) => {
@@ -228,7 +240,11 @@ test.cb('validation when no "qs" template is provided', (t) => {
   const { load, uri, qsNoTemplate } = t.context;
   const params = {
     uri,
-    applyToQueryString: true,
+    plugins: {
+      formatUrlTemplate: {
+        applyToQueryString: true,
+      },
+    },
     qs: qsNoTemplate,
     mockTemplate: 'mockMappedTemplate',
   };
@@ -247,7 +263,11 @@ test.cb('validation when wrong "qs" template is provided', (t) => {
   const params = {
     uri,
     qs,
-    applyToQueryString: true,
+    plugins: {
+      formatUrlTemplate: {
+        applyToQueryString: true,
+      },
+    },
     wrongQsTemplate: 'mockTemplate',
   };
   load(null, params, (err, modifiedParams) => {
@@ -279,7 +299,11 @@ test.cb('validation when "applyToUrl" is set to false', (t) => {
   const { load, uri } = t.context;
   const params = {
     uri,
-    applyToUrl: false,
+    plugins: {
+      formatUrlTemplate: {
+        applyToUrl: false,
+      },
+    },
     authType: 'oauth',
   };
   load(null, params, (err, modifiedParams) => {

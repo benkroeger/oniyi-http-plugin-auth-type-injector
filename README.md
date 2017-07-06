@@ -32,6 +32,7 @@ const defaultTypeToNameMap = {
   cookies: 'form',
 };
 ```
+## Conventions
 
 It is important to follow couple of conventions when defining a request uri:
 
@@ -76,9 +77,13 @@ You are able to add multiple templates into uri (`'pathID',...`), as long as you
    
 ```js
 const requestOptions = {
-  applyToUrl: true,
-  applyToQueryString: false,
-  }
+  plugins: {
+    formatUrlTemplate: {
+        applyToUrl: true,
+        applyToQueryString: false,
+    },
+  },
+}
 ```
 These are the default values.
 
@@ -89,11 +94,14 @@ Set `applyToQueryString` to `true` if formatting query string ( 'qs' ) is requir
 const requestOptions = {
   auth: {},
   headers: {},
-  method: '',
   qs: {
     pageSize: '{ psTemplate }',
   },
-  applyToQueryString: true,
+  plugins: {
+    formatUrlTemplate: {
+      applyToQueryString: true,
+    },
+  },
   uri: 'my/custom/{ authType }/path',
   psTemplate: '15',
 }
