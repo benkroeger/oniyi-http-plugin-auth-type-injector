@@ -1,7 +1,7 @@
 {
   "name": "oniyi-http-plugin-format-url-template",
   "version": "0.0.1",
-  "description": "Plugin responsible for injecting injecting template values in url path",
+  "description": "Plugin responsible for injecting injecting template values in url path and/or query string",
   "license": "UNLICENSED",
   "author": {
     "name": "Andreja Jevtic",
@@ -12,8 +12,9 @@
     "oniyi",
     "http",
     "plugin",
-    "auth",
-    "injector"
+    "format",
+    "url",
+    "template"
   ],
   "repository": {
     "type": "git",
