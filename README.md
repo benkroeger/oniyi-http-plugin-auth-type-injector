@@ -182,7 +182,7 @@ be removed completely from an uri.
 ```js
 const requestOptions = {
   authType: '', // or 0, null, undefined, false, NaN
-    uri: 'my/custom/{ authType }/path',
+  uri: 'my/custom/{ authType }/path',
   //...
   };
   //...
