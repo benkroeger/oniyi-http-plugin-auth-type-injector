@@ -348,7 +348,7 @@ test.cb('validation when wrong "qs" template is provided', (t) => {
   });
 });
 
-test.cb('validation when "authType" is not provided', (t) => {
+test.cb('validation when "authType" is not provided ( Falsy => equal to undefined)', (t) => {
   const { load, uri } = t.context;
   const requestOptions = {
     uri,
@@ -357,7 +357,41 @@ test.cb('validation when "authType" is not provided', (t) => {
     const { uri: { href: originalPath } } = requestOptions;
     const { uri: { href: modifiedPath } } = modifiedParams;
 
-    t.is(originalPath, modifiedPath, `original uri path should not be different from modified path.
+    t.not(originalPath, modifiedPath, `original uri path should be different from modified path.
+      original: {${originalPath}}, modified: {${modifiedPath}}`);
+
+    t.end();
+  });
+});
+
+test.cb('validation when "authType" is null', (t) => {
+  const { load, uri } = t.context;
+  const requestOptions = {
+    uri,
+    authType: null,
+  };
+  load(null, requestOptions, (err, modifiedParams) => {
+    const { uri: { href: originalPath } } = requestOptions;
+    const { uri: { href: modifiedPath } } = modifiedParams;
+
+    t.not(originalPath, modifiedPath, `original uri path should be different from modified path.
+      original: {${originalPath}}, modified: {${modifiedPath}}`);
+
+    t.end();
+  });
+});
+
+test.cb('validation when "authType" is an empty string', (t) => {
+  const { load, uri } = t.context;
+  const requestOptions = {
+    uri,
+    authType: '',
+  };
+  load(null, requestOptions, (err, modifiedParams) => {
+    const { uri: { href: originalPath } } = requestOptions;
+    const { uri: { href: modifiedPath } } = modifiedParams;
+
+    t.not(originalPath, modifiedPath, `original uri path should be different from modified path.
       original: {${originalPath}}, modified: {${modifiedPath}}`);
 
     t.end();
