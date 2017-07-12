@@ -1,7 +1,7 @@
 {
-  "name": "oniyi-http-plugin-auth-type-injector",
+  "name": "oniyi-http-plugin-format-url-template",
   "version": "0.0.1",
-  "description": "Plugin responsible for injecting auth type in url",
+  "description": "Plugin responsible for injecting injecting template values in url path and/or query string",
   "license": "UNLICENSED",
   "author": {
     "name": "Andreja Jevtic",
@@ -12,8 +12,9 @@
     "oniyi",
     "http",
     "plugin",
-    "auth",
-    "injector"
+    "format",
+    "url",
+    "template"
   ],
   "repository": {
     "type": "git",
@@ -21,22 +22,19 @@
   },
   "scripts": {
     "test": "ava --verbose",
-    "coverage": "nyc npm run test && nyc report --reporter=text-lcov > coverage.lcov"
+    "coverage": "nyc npm run test && nyc report --reporter=html"
   },
   "dependencies": {
     "async": "2.4.0",
     "lodash": "4.17.4",
-    "mustache": "^2.3.0",
     "oniyi-logger": "1.0.0"
   },
   "devDependencies": {
+    "ava": "0.20.0",
+    "babel-eslint": "7.2.3",
     "eslint": "3.15.0",
     "eslint-config-oniyi": "4.4.0",
-    "ava": "^0.18.2",
-    "babel-eslint": "^7.1.1",
-    "dotenv": "^4.0.0",
-    "eslint-plugin-ava": "^4.2.0",
-    "nock": "^9.0.13",
-    "nyc": "^10.1.2"
+    "eslint-plugin-ava": "4.2.1",
+    "nyc": "10.3.2"
   }
 }
