@@ -348,56 +348,6 @@ test.cb('validation when wrong "qs" template is provided', (t) => {
   });
 });
 
-test.cb('validation when "authType" is not provided ( Falsy => equal to undefined)', (t) => {
-  const { load, uri } = t.context;
-  const requestOptions = {
-    uri,
-  };
-  load(null, requestOptions, (err, modifiedParams) => {
-    const { uri: { href: originalPath } } = requestOptions;
-    const { uri: { href: modifiedPath } } = modifiedParams;
-
-    t.not(originalPath, modifiedPath, `original uri path should be different from modified path.
-      original: {${originalPath}}, modified: {${modifiedPath}}`);
-
-    t.end();
-  });
-});
-
-test.cb('validation when "authType" is null', (t) => {
-  const { load, uri } = t.context;
-  const requestOptions = {
-    uri,
-    authType: null,
-  };
-  load(null, requestOptions, (err, modifiedParams) => {
-    const { uri: { href: originalPath } } = requestOptions;
-    const { uri: { href: modifiedPath } } = modifiedParams;
-
-    t.not(originalPath, modifiedPath, `original uri path should be different from modified path.
-      original: {${originalPath}}, modified: {${modifiedPath}}`);
-
-    t.end();
-  });
-});
-
-test.cb('validation when "authType" is an empty string', (t) => {
-  const { load, uri } = t.context;
-  const requestOptions = {
-    uri,
-    authType: '',
-  };
-  load(null, requestOptions, (err, modifiedParams) => {
-    const { uri: { href: originalPath } } = requestOptions;
-    const { uri: { href: modifiedPath } } = modifiedParams;
-
-    t.not(originalPath, modifiedPath, `original uri path should be different from modified path.
-      original: {${originalPath}}, modified: {${modifiedPath}}`);
-
-    t.end();
-  });
-});
-
 test.cb('validation when "applyToUrl" is set to false', (t) => {
   const { load, uri } = t.context;
   const requestOptions = {
@@ -420,7 +370,7 @@ test.cb('validation when "applyToUrl" is set to false', (t) => {
   });
 });
 
-test.cb('validate when "authType" provided with falsy value', (t) => {
+test.cb('validate when "authType" provided with an empty string', (t) => {
   const { load, uri } = t.context;
   const requestOptions = {
     uri,
@@ -434,7 +384,26 @@ test.cb('validate when "authType" provided with falsy value', (t) => {
     t.not(originalPath, modifiedPath, `original uri path should be different from modified path.
       original: {${originalPath}}, modified: {${modifiedPath}}`);
     t.falsy(modifiedPath.match(/([^:]\/)\/+/g), `modified path: {${modifiedPath}} should not contain double slashes`);
-    t.falsy(modifiedPath.match(/(authType)/, `modified path: {${modifiedPath}} should not contain "authType" when falsy value provided`));
+    t.falsy(modifiedPath.match(/(authType)/, `modified path: {${modifiedPath}} should not contain "authType" when an empty string is provided`));
+    t.end();
+  });
+});
+
+test.cb('validate when "authType" is equal to undefined / not present', (t) => {
+  const { load, uri } = t.context;
+  const requestOptions = {
+    uri,
+    authType: undefined,
+  };
+
+  load(null, requestOptions, (err, modifiedParams) => {
+    const { uri: { href: originalPath } } = requestOptions;
+    const { uri: { href: modifiedPath } } = modifiedParams;
+
+    t.is(originalPath, modifiedPath, `original uri path should not be different from modified path.
+      original: {${originalPath}}, modified: {${modifiedPath}}`);
+    t.true(modifiedPath.includes('authType'),
+      `modified path: {${modifiedPath}} should contain "authType" when authType param is undefined / not provided`);
     t.end();
   });
 });
