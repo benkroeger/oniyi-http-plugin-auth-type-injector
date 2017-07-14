@@ -25,7 +25,6 @@
     "coverage": "nyc npm run test && nyc report --reporter=html"
   },
   "dependencies": {
-    "async": "2.4.0",
     "lodash": "4.17.4",
     "oniyi-logger": "1.0.0"
   },
