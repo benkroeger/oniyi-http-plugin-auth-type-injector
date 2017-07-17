@@ -1,24 +1,19 @@
 {
   "name": "oniyi-http-plugin-format-url-template",
   "version": "1.0.0",
-  "description": "Plugin responsible for injecting injecting template values in url path and/or query string",
-  "license": "UNLICENSED",
-  "author": {
-    "name": "Andreja Jevtic",
-    "email": "andjevtic@gmail.com"
-  },
+  "description": "Plugin for injecting template values into request href and/or query string",
+  "license": "MIT",
+  "author": "Andreja Jevtic <andjevtic@gmail.com>",
+  "contributors": ["Benjamin Kroeger <benjamin.kroeger@gmail.com>"],
   "main": "lib/index.js",
   "keywords": [
     "oniyi",
-    "http",
-    "plugin",
-    "format",
-    "url",
-    "template"
+    "http-plugin",
+    "format-url-template"
   ],
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@bitbucket.org/gisag/oniyi-http-plugin-auth-type-injector.git"
+    "url": "git+ssh://git@github.com:benkroeger/oniyi-http-plugin-auth-type-injector.git"
   },
   "scripts": {
     "test": "ava --verbose",
@@ -36,5 +31,9 @@
     "eslint-plugin-ava": "4.2.1",
     "jsdoc-to-markdown": "3.0.0",
     "nyc": "10.3.2"
+  },
+  "homepage": "https://github.com/benkroeger/oniyi-http-plugin-auth-type-injector#readme",
+  "directories": {
+    "test": "test"
   }
 }
