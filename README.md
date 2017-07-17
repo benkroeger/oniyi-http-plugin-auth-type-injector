@@ -1,4 +1,4 @@
-# oniyi-http-plugin-auth-type
+# oniyi-http-plugin-format-url-template
 Plugin responsible for injecting injecting template values in url path or query string (qs) object.
 
 ## Install
