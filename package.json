@@ -13,7 +13,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com:benkroeger/oniyi-http-plugin-auth-type-injector.git"
+    "url": "git+ssh://git@github.com:benkroeger/oniyi-http-plugin-format-url-template.git"
   },
   "scripts": {
     "test": "ava --verbose",
@@ -32,7 +32,7 @@
     "jsdoc-to-markdown": "3.0.0",
     "nyc": "10.3.2"
   },
-  "homepage": "https://github.com/benkroeger/oniyi-http-plugin-auth-type-injector#readme",
+  "homepage": "https://github.com/benkroeger/oniyi-http-plugin-format-url-template#readme",
   "directories": {
     "test": "test"
   }
