@@ -16,41 +16,40 @@ const clientOptions = {};
 const httpClient = new OniyiHttpClient(clientOptions);
 
 const pluginOptions = {
-  typeToNameMap: {
-    oauth: 'myAuthType', // this line overrides default 'myAuthType' type name, and 'myAuthType' will be injected into url if requested
+  valuesMap: {
+    authType: {
+      oauth: 'myAuthType', // this line overrides default 'myAuthType' type name, and 'myAuthType' will be injected into url if requested
+    }
   },
-  formatUrlTemplate: {
-    applyToQueryString: true,
-  },
+  applyToQueryString: true,
 };
 
 httpClient.use(oniyiHttpPluginUrlTemplate(pluginOptions));
 ```
 
-This is the default mapping object, it can be overridden by providing custom 'typeToNameMap' as shown above
+These are the default plugin options, they can be overridden as shown above (merged deeply)
 
 ```js
-const defaultTypeToNameMap = {
-  oauth: 'oauth',
-  basic: 'basic',
-  saml: 'form',
-  cookies: 'form',
-};
-```
-These are the default format url template options, it can be overridden by providing custom 'formatUrlTemplate' as shown above
-
-```js
-const defaultFormatUrlTemplate = {
+const defaultPluginOptions = {
   applyToUrl: true,
   applyToQueryString: false,
+  valuesMap: {
+    authType: {
+      oauth: 'oauth',
+      basic: 'basic',
+      saml: 'form',
+      cookie: 'form',
+    },
+  },
 };
 ```
+
 ## Conventions
 
 It is important to follow couple of conventions when defining a request uri:
 
    -- **convention 1** --
-   
+
 ```js
 const requestOptions = {
   auth: {},
@@ -68,12 +67,12 @@ const requestOptions = {
  3. { **authType**}
  4. { **authType** }
 
-`{authType}` does not have to be used within every single http request in service. 
+`{authType}` does not have to be used within every single http request in service.
 The logic behind this plugin is to only format template Strings if any was found. Otherwise it will return parsed uri without
 any changes.
 
    -- **convention 2** --
-   
+
 ```js
 const requestOptions = {
   auth: {},
@@ -87,17 +86,15 @@ const requestOptions = {
 You are able to add multiple templates into uri (`'pathID',...`), as long as you define their values within `requestOptions`.
 
    -- **convention 3** --
-   
+
 Format url template options can be applied on two levels:
-   
+
    1. When initializing plugin:
-   
+
 ```js
 const pluginOptions = {
-  typeToNameMap: {},
-  formatUrlTemplate: {
-    applyToUrl: false,
-  },
+  valuesMap: {},
+  applyToUrl: false,
 };
 
 httpClient.use(oniyiHttpPluginAuthType(pluginOptions));
@@ -110,7 +107,7 @@ const requestOptions = {
   qs: {},
   uri: 'my/custom/path/without/template',
   plugins: {
-    formatUrlTemplate: {
+    formatUrlTemplate: { // camelized plugin name
       applyToUrl: false,
     },
   },
@@ -119,7 +116,7 @@ const requestOptions = {
 
 Set `applyToUrl` to `false` if there is no need to apply this plugin on an `uri`.
 
-Set `applyToQueryString` to `true` if formatting query string ( 'qs' ) is required. 
+Set `applyToQueryString` to `true` if formatting query string ( 'qs' ) is required.
 
 Setup under 1. overwrites the default `formatUrlTempalte` options, while setup under 2. overwrites initial `pluginOptions` setup
 
@@ -128,7 +125,7 @@ const requestOptions = {
   auth: {},
   headers: {},
   qs: {
-    pageSize: '{ psTemplate }',
+    pageSize: '{ pageSize }',
   },
   plugins: {
     formatUrlTemplate: {
@@ -136,7 +133,7 @@ const requestOptions = {
     },
   },
   uri: 'my/custom/path',
-  psTemplate: '15',
+  pageSize: '15',
 }
 ```
 
@@ -154,7 +151,7 @@ const requestOptions = {
   }
 ```
 
-If `conventions 1 && 2` have not been implemented properly, plugin will leave `url` object with _encoded_ special 
+If `conventions 1 && 2` have not been implemented properly, plugin will leave `url` object with _encoded_ special
 characters / tags as follows:
 ```
 {
@@ -175,7 +172,7 @@ characters / tags as follows:
 }
 ```
 
-This way plugin is notifying service that something went wrong while setting up, most likely because of a typo. 
+This way plugin is notifying service that something went wrong while setting up, most likely because of a typo.
 
 `authType` can be added with falsy value as default, and in return it will
 be removed completely from an uri.
@@ -186,7 +183,7 @@ const requestOptions = {
   //...
   };
   //...
-  
+
 const httpResponse = {
   uri: {
     auth: null,
@@ -214,9 +211,9 @@ Similar goes for `qs` parameter, response will look like this:
 }
 
 ```
- 
+
 The reason why `qs` response is not encoded as `uri` is because plugin uses `url.parse(uri);` which encodes
-all special characters that are used in the uri string. 
+all special characters that are used in the uri string.
 
 This way it should be relatively simple injecting any parameter into service `uri / qs` path, in order to load the same
 service by different auth providers (ibm-connections-cloud, microsoft...) by using custom template mapping.
