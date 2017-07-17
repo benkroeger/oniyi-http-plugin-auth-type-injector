@@ -1,7 +1,7 @@
 ## Functions
 
 <dl>
-<dt><a href="#pluginFactory">pluginFactory()</a> ⇒ <code>*</code></dt>
+<dt><a href="#pluginFactory">pluginFactory([params])</a> ⇒ <code>*</code></dt>
 <dd><p>Replace templateStrings in your requestOptions&#39;s <code>uri</code> and <code>qs</code> with values extracted from other
 properties in <code>requestOptions</code></p>
 </dd>
@@ -35,7 +35,7 @@ Provided &#39;regex&#39; extracts String template from given template and groups
 
 <a name="pluginFactory"></a>
 
-## pluginFactory() ⇒ <code>\*</code>
+## pluginFactory([params]) ⇒ <code>\*</code>
 Replace templateStrings in your requestOptions's `uri` and `qs` with values extracted from other
 properties in `requestOptions`
 
@@ -43,6 +43,7 @@ properties in `requestOptions`
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
+| [params] | <code>Object</code> |  | the plugin params |
 | [params.valuesMap] | <code>Object</code> |  | map templateValues to a custom value |
 | [params.applyToUrl] | <code>Boolean</code> | <code>true</code> | parse template strings in url parameter? |
 | [params.applyToQueryString] | <code>Boolean</code> | <code>false</code> | parse template strings in query parameter? |
