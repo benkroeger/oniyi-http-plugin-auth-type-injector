@@ -1,6 +1,6 @@
 {
   "name": "oniyi-http-plugin-format-url-template",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Plugin responsible for injecting injecting template values in url path and/or query string",
   "license": "UNLICENSED",
   "author": {
