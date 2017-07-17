@@ -1,10 +1,12 @@
 {
   "name": "oniyi-http-plugin-format-url-template",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Plugin for injecting template values into request href and/or query string",
   "license": "MIT",
   "author": "Andreja Jevtic <andjevtic@gmail.com>",
-  "contributors": ["Benjamin Kroeger <benjamin.kroeger@gmail.com>"],
+  "contributors": [
+    "Benjamin Kroeger <benjamin.kroeger@gmail.com>"
+  ],
   "main": "lib/index.js",
   "keywords": [
     "oniyi",
