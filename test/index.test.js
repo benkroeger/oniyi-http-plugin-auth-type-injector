@@ -13,10 +13,12 @@ const formatUrlTemplate = require('../lib');
 const regex = /({\s?([0-9a-zA-Z_]+)\s?})/;
 
 test.beforeEach((t) => {
-  const typeToNameMap = {
-    oauth: 'oauth2',
-    basic: 'BASIC',
-    saml: 'saml3',
+  const valuesMap = {
+    authType: {
+      oauth: 'oauth2',
+      basic: 'BASIC',
+      saml: 'saml3',
+    },
   };
 
   const initPlugin = formatUrlTemplate();
@@ -49,7 +51,7 @@ test.beforeEach((t) => {
   _.assign(t.context, {
     load,
     getValues,
-    typeToNameMap,
+    valuesMap,
     uri,
     uriTemplateCombination,
     noAuthTypeTemplate,
@@ -93,8 +95,8 @@ test.cb('validation when { authType } is provided, authType: "basic"', (t) => {
 });
 
 test.cb('validation when {userid2} && {userid3} template provided, multiple "qs" templates provided', (t) => {
-  const { uri, typeToNameMap, multipleQs } = t.context;
-  const { load } = formatUrlTemplate({ typeToNameMap });
+  const { uri, valuesMap, multipleQs } = t.context;
+  const { load } = formatUrlTemplate({ valuesMap });
 
   const requestOptions = {
     uri,
@@ -123,9 +125,9 @@ test.cb('validation when {userid2} && {userid3} template provided, multiple "qs"
   });
 });
 
-test.cb('validation when {authType} is provided, authType: "basic", typeToNameMap matches requirements', (t) => {
-  const { uri, typeToNameMap } = t.context;
-  const { load } = formatUrlTemplate({ typeToNameMap });
+test.cb('validation when {authType} is provided, authType: "basic", valuesMap matches requirements', (t) => {
+  const { uri, valuesMap } = t.context;
+  const { load } = formatUrlTemplate({ valuesMap });
 
   const requestOptions = {
     uri,
@@ -140,7 +142,7 @@ test.cb('validation when {authType} is provided, authType: "basic", typeToNameMa
 
     t.not(originalPath, modifiedPath, `original uri path should be different from modified path.
       original: {${originalPath}}, modified: {${modifiedPath}}`);
-    t.true(modifiedPath.includes(typeToNameMap[authType]), `${typeToNameMap[authType]} should be part of modified path. provided: {${modifiedPath}}`);
+    t.true(modifiedPath.includes(valuesMap.authType[authType]), `${valuesMap.authType[authType]} should be part of modified path. provided: {${modifiedPath}}`);
     t.end();
   });
 });
@@ -196,9 +198,7 @@ test.cb('validation when "applyToUrl" is set to false, "applyToQueryString" is s
 test.cb('validation when "applyToUrl" is set via "pluginOptions"', (t) => {
   const { uri } = t.context;
   const { load } = formatUrlTemplate({
-    formatUrlTemplate: {
-      applyToUrl: false,
-    },
+    applyToUrl: false,
   });
   const requestOptions = {
     uri,

@@ -6,7 +6,7 @@
 const test = require('ava');
 
 // internal modules
-const { renderTemplate, formatQuery, formatPath } = require('../lib/utils');
+const { renderTemplate, formatQuery, formatHref } = require('../lib/utils');
 
 
 test('renderTemplate leaves template unchanged when templateString is undefined in templateValues', (t) => {
@@ -26,21 +26,21 @@ test('renderTemplate replaces templateStrings with values from templateValues', 
 test('renderTemplate replaces templateStrings with values from valuesMap if not undefined', (t) => {
   const template = '/foo/{ bar }';
   const templateValues = { bar: 'baz' };
-  const valuesMap = { baz: 'woohoo' };
+  const valuesMap = { bar: { baz: 'woohoo' } };
   const result = renderTemplate(template, templateValues, valuesMap);
   t.is(result, '/foo/woohoo');
 });
 
-test('formatPath removes doubleslashes', (t) => {
+test('formatHref removes doubleslashes', (t) => {
   const template = '/foo//bar';
-  const result = formatPath(template);
+  const result = formatHref(template);
   t.is(result, '/foo/bar');
 });
 
-test('formatPath replaces templateStrings with values from templateValues and removes doubleslashes', (t) => {
+test('formatHref replaces templateStrings with values from templateValues and removes doubleslashes', (t) => {
   const template = '/foo/{ bar }';
   const templateValues = { bar: '/baz' };
-  const result = formatPath(template, templateValues);
+  const result = formatHref(template, templateValues);
   t.is(result, '/foo/baz');
 });
 
@@ -54,7 +54,7 @@ test('formatQuery replaces templateStrings in querystring object', (t) => {
 test('formatQuery replaces templateStrings in querystring object with values from valuesMap if not undefined', (t) => {
   const query = { param: '{ foo }' };
   const templateValues = { foo: 'bar' };
-  const valuesMap = { bar: 'baz' };
+  const valuesMap = { foo: { bar: 'baz' } };
   const result = formatQuery(query, templateValues, valuesMap);
   t.deepEqual(result, { param: 'baz' });
 });
