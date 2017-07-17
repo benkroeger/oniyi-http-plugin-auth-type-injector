@@ -285,26 +285,6 @@ test.cb('validation when wrong { authType } is provided as url template, authTyp
   });
 });
 
-test.cb('validation when "qs" is not provided', (t) => {
-  const { load, uri } = t.context;
-  const requestOptions = {
-    uri,
-    plugins: {
-      formatUrlTemplate: {
-        applyToQueryString: true,
-      },
-    },
-    mockTemplate: 'mockMappedTemplate',
-  };
-  load(null, requestOptions, (err, modifiedParams) => {
-    t.true('qs' in modifiedParams, '"qs" should be a member of {modifiedParams} when "applyToQueryString" is set to true');
-    const { qs } = modifiedParams;
-
-    t.true(_.isObject(qs), '"qs" should be an Object');
-    t.end();
-  });
-});
-
 test.cb('validation when no "qs" template is provided', (t) => {
   const { load, uri, qsNoTemplate } = t.context;
   const requestOptions = {
