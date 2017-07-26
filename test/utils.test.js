@@ -24,11 +24,11 @@ test('renderTemplate replaces templateStrings with values from templateValues', 
 });
 
 test('renderTemplate replaces templateStrings with values from valuesMap if not undefined', (t) => {
-  const template = '/foo/{ bar }';
-  const templateValues = { bar: 'baz' };
-  const valuesMap = { bar: { baz: 'woohoo' } };
+  const template = '/foo/{ empty }/{ bar }';
+  const templateValues = { bar: 'baz', empty: 'empty-string' };
+  const valuesMap = { bar: { baz: 'woohoo' }, empty: { 'empty-string': '' } };
   const result = renderTemplate(template, templateValues, valuesMap);
-  t.is(result, '/foo/woohoo');
+  t.is(result, '/foo//woohoo');
 });
 
 test('formatHref removes doubleslashes', (t) => {
