@@ -31,6 +31,7 @@ test.beforeEach((t) => {
   // uri variables
   const uri = url.parse('https://apps.na.collabserv.com/files/{ authType }/api/feed');
   const uriTemplateCombination = url.parse('https://apps.na.collabserv.com/files/{ authType }/api/{ mockParam }/feed');
+  const uriWithUmlauts = url.parse('https://apps.na.collabserv.com/files/api/label/ä, ö, ü, Ä, Ö, Ü, ß');
 
   const noAuthTypeTemplate = url.parse('https://apps.na.collabserv.com/files/api/feed');
   const wrongTemplateUrl = url.parse('https://apps.na.collabserv.com/files/{ badAuthType }/api/feed');
@@ -54,6 +55,7 @@ test.beforeEach((t) => {
     valuesMap,
     uri,
     uriTemplateCombination,
+    uriWithUmlauts,
     noAuthTypeTemplate,
     wrongTemplateUrl,
     qs,
@@ -82,10 +84,12 @@ test.cb('validation when { authType } is provided, authType: "basic"', (t) => {
     authType: 'basic',
   };
   load(null, requestOptions, (err, modifiedParams) => {
+    t.ifError(err);
     const { uri: { href: originalPath } } = requestOptions;
     const { uri: { href: modifiedPath } } = modifiedParams;
 
-    Object.keys(requestOptions).forEach(elem => t.true(elem in modifiedParams, `${elem} should be a member of modifiedParams`));
+    Object.keys(requestOptions)
+      .forEach(elem => t.true(elem in modifiedParams, `${elem} should be a member of modifiedParams`));
 
     t.not(originalPath, modifiedPath, `original uri path should be different from modified path.
       original: {${originalPath}}, modified: {${modifiedPath}}`);
@@ -112,13 +116,16 @@ test.cb('validation when {userid2} && {userid3} template provided, multiple "qs"
   };
 
   load(null, requestOptions, (err, modifiedParams) => {
+    t.ifError(err);
+
     const { getValues } = t.context;
     const { qs } = modifiedParams;
 
     getValues(multipleQs).forEach((templateValue) => {
       const [, , value] = templateValue.match(regex);
       const mappedValue = requestOptions[value];
-      t.true(Object.keys(qs).some(key => qs[key] === mappedValue), `{${mappedValue}} should be one of the values of {modifiedParams}`);
+      t.true(Object.keys(qs).some(key => qs[key] === mappedValue),
+        `{${mappedValue}} should be one of the values of {modifiedParams}`);
     });
 
     t.end();
@@ -135,14 +142,18 @@ test.cb('validation when {authType} is provided, authType: "basic", valuesMap ma
   };
 
   load(null, requestOptions, (err, modifiedParams) => {
+    t.ifError(err);
+
     const { uri: { href: originalPath }, authType } = requestOptions;
     const { uri: { href: modifiedPath } } = modifiedParams;
 
-    Object.keys(requestOptions).forEach(elem => t.true(elem in modifiedParams, `${elem} should be a member of modifiedParams`));
+    Object.keys(requestOptions)
+      .forEach(elem => t.true(elem in modifiedParams, `${elem} should be a member of modifiedParams`));
 
     t.not(originalPath, modifiedPath, `original uri path should be different from modified path.
       original: {${originalPath}}, modified: {${modifiedPath}}`);
-    t.true(modifiedPath.includes(valuesMap.authType[authType]), `${valuesMap.authType[authType]} should be part of modified path. provided: {${modifiedPath}}`);
+    t.true(modifiedPath.includes(valuesMap.authType[authType]),
+      `${valuesMap.authType[authType]} should be part of modified path. provided: {${modifiedPath}}`);
     t.end();
   });
 });
@@ -157,15 +168,19 @@ test.cb('validation when {authType} && {mockParam} are provided, authType: "oaut
   };
 
   load(null, requestOptions, (err, modifiedParams) => {
+    t.ifError(err);
     const { uri: { href: originalPath }, authType, mockParam } = requestOptions;
     const { uri: { href: modifiedPath } } = modifiedParams;
 
-    Object.keys(requestOptions).forEach(elem => t.true(elem in modifiedParams, `${elem} should be a member of modifiedParams`));
+    Object.keys(requestOptions)
+      .forEach(elem => t.true(elem in modifiedParams, `${elem} should be a member of modifiedParams`));
 
     t.not(originalPath, modifiedPath, `original uri path should be different from modified path.
       original: {${originalPath}}, modified: {${modifiedPath}}`);
-    t.true(modifiedPath.includes(authType), `${authType} should be part of modified path. provided: {${modifiedPath}}`);
-    t.true(modifiedPath.includes(mockParam), `${mockParam} should be part of modified path. provided: {${modifiedPath}}`);
+    t.true(modifiedPath.includes(authType),
+      `${authType} should be part of modified path. provided: {${modifiedPath}}`);
+    t.true(modifiedPath.includes(mockParam),
+      `${mockParam} should be part of modified path. provided: {${modifiedPath}}`);
     t.end();
   });
 });
@@ -185,6 +200,8 @@ test.cb('validation when "applyToUrl" is set to false, "applyToQueryString" is s
     mockParam: 'customQsPath',
   };
   load(null, requestOptions, (err, modifiedParams) => {
+    t.ifError(err);
+
     const { uri: { href: originalPath }, mockParam } = requestOptions;
     const { uri: { href: modifiedPath }, qs } = modifiedParams;
 
@@ -205,12 +222,15 @@ test.cb('validation when "applyToUrl" is set via "pluginOptions"', (t) => {
     authType: 'oauth',
   };
   load(null, requestOptions, (err, modifiedParams) => {
+    t.ifError(err);
+
     const { uri: { href: originalPath }, authType } = requestOptions;
     const { uri: { href: modifiedPath } } = modifiedParams;
 
     t.is(originalPath, modifiedPath, `original uri path should not be different from modified path.
       original: {${originalPath}}, modified: {${modifiedPath}}`);
-    t.not(modifiedPath.includes(authType), `{authType} ${authType} should not be injected in url. provided: ${modifiedPath}`);
+    t.not(modifiedPath.includes(authType),
+      `{authType} ${authType} should not be injected in url. provided: ${modifiedPath}`);
     t.end();
   });
 });
@@ -235,12 +255,15 @@ test.cb('validation when "applyToUrl" is set via both "pluginOptions" and "reque
   };
 
   load(null, requestOptions, (err, modifiedParams) => {
+    t.ifError(err);
+
     const { uri: { href: originalPath }, authType } = requestOptions;
     const { uri: { href: modifiedPath } } = modifiedParams;
 
     t.not(originalPath, modifiedPath, `original uri path should be different from modified path.
       original: {${originalPath}}, modified: {${modifiedPath}}`);
-    t.not(modifiedPath.includes(authType), `{authType} ${authType} should not be injected in url. provided: ${modifiedPath}`);
+    t.not(modifiedPath.includes(authType),
+      `{authType} ${authType} should not be injected in url. provided: ${modifiedPath}`);
 
     t.end();
   });
@@ -255,13 +278,17 @@ test.cb('validation when { authType } is not provided in url template, authType:
     authType: 'basic',
   };
   load(null, requestOptions, (err, modifiedParams) => {
+    t.ifError(err);
+
     const { uri: { href: originalPath } } = requestOptions;
     const { uri: { href: modifiedPath } } = modifiedParams;
 
-    Object.keys(requestOptions).forEach(elem => t.true(elem in modifiedParams, `${elem} should be a member of modifiedParams`));
+    Object.keys(requestOptions)
+      .forEach(elem => t.true(elem in modifiedParams, `${elem} should be a member of modifiedParams`));
     t.is(originalPath, modifiedPath, `original uri path should not be different from modified path.
       original: {${originalPath}}, modified: {${modifiedPath}}`);
-    t.false(modifiedPath.includes('basic'), `"basic" should not be part of modified path. provided: {${modifiedPath}}`);
+    t.false(modifiedPath.includes('basic'),
+      `"basic" should not be part of modified path. provided: {${modifiedPath}}`);
     t.end();
   });
 });
@@ -273,14 +300,18 @@ test.cb('validation when wrong { authType } is provided as url template, authTyp
     authType: 'basic',
   };
   load(null, requestOptions, (err, modifiedParams) => {
+    t.ifError(err);
+
     const { uri: { href: originalPath } } = requestOptions;
     const { uri: { href: modifiedPath } } = modifiedParams;
 
-    Object.keys(requestOptions).forEach(elem => t.true(elem in modifiedParams, `${elem} should be a member of modifiedParams`));
+    Object.keys(requestOptions)
+      .forEach(elem => t.true(elem in modifiedParams, `${elem} should be a member of modifiedParams`));
 
     t.is(originalPath, modifiedPath, `original uri path should not be different from modified path.
       original: {${originalPath}}, modified: {${modifiedPath}}`);
-    t.false(modifiedPath.includes('basic'), `"basic" should not be part of modified path. provided: {${modifiedPath}}`);
+    t.false(modifiedPath.includes('basic'),
+      `"basic" should not be part of modified path. provided: {${modifiedPath}}`);
     t.end();
   });
 });
@@ -298,6 +329,8 @@ test.cb('validation when no "qs" template is provided', (t) => {
     mockTemplate: 'mockMappedTemplate',
   };
   load(null, requestOptions, (err, modifiedParams) => {
+    t.ifError(err);
+
     const { qs: originalQs } = requestOptions;
     const { qs: modifiedQs } = modifiedParams;
 
@@ -320,6 +353,8 @@ test.cb('validation when wrong "qs" template is provided', (t) => {
     wrongQsTemplate: 'mockTemplate',
   };
   load(null, requestOptions, (err, modifiedParams) => {
+    t.ifError(err);
+
     const { qs: originalQs } = requestOptions;
     const { qs: modifiedQs } = modifiedParams;
     t.deepEqual(originalQs, modifiedQs, `original query string should be different from modified query string.
@@ -340,6 +375,8 @@ test.cb('validation when "applyToUrl" is set to false', (t) => {
     authType: 'oauth',
   };
   load(null, requestOptions, (err, modifiedParams) => {
+    t.ifError(err);
+
     const { uri: { href: originalPath } } = requestOptions;
     const { uri: { href: modifiedPath } } = modifiedParams;
 
@@ -358,13 +395,17 @@ test.cb('validate when "authType" provided with an empty string', (t) => {
   };
 
   load(null, requestOptions, (err, modifiedParams) => {
+    t.ifError(err);
+
     const { uri: { href: originalPath } } = requestOptions;
     const { uri: { href: modifiedPath } } = modifiedParams;
 
     t.not(originalPath, modifiedPath, `original uri path should be different from modified path.
       original: {${originalPath}}, modified: {${modifiedPath}}`);
-    t.falsy(modifiedPath.match(/([^:]\/)\/+/g), `modified path: {${modifiedPath}} should not contain double slashes`);
-    t.falsy(modifiedPath.match(/(authType)/, `modified path: {${modifiedPath}} should not contain "authType" when an empty string is provided`));
+    t.falsy(modifiedPath.match(/([^:]\/)\/+/g),
+      `modified path: {${modifiedPath}} should not contain double slashes`);
+    t.falsy(modifiedPath.match(/(authType)/,
+      `modified path: {${modifiedPath}} should not contain "authType" when an empty string is provided`));
     t.end();
   });
 });
@@ -377,6 +418,8 @@ test.cb('validate when "authType" is equal to undefined / not present', (t) => {
   };
 
   load(null, requestOptions, (err, modifiedParams) => {
+    t.ifError(err);
+
     const { uri: { href: originalPath } } = requestOptions;
     const { uri: { href: modifiedPath } } = modifiedParams;
 
@@ -384,6 +427,25 @@ test.cb('validate when "authType" is equal to undefined / not present', (t) => {
       original: {${originalPath}}, modified: {${modifiedPath}}`);
     t.true(modifiedPath.includes('authType'),
       `modified path: {${modifiedPath}} should contain "authType" when authType param is undefined / not provided`);
+    t.end();
+  });
+});
+test.cb('validate when url contains German special characters', (t) => {
+  const { load, uriWithUmlauts } = t.context;
+  const requestOptions = {
+    uri: uriWithUmlauts,
+    authType: '',
+  };
+
+  load(null, requestOptions, (err, modifiedParams) => {
+    t.ifError(err);
+
+    const { uri: { href: originalPath } } = requestOptions;
+    const { uri: { href: modifiedPath } } = modifiedParams;
+
+    const encodedOriginalPath = encodeURI(decodeURI(originalPath));
+    t.is(encodedOriginalPath, modifiedPath, `encoded original uri path should not be different from modified path.
+      original: {${encodedOriginalPath}}, modified: {${modifiedPath}}`);
     t.end();
   });
 });
