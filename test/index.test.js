@@ -28,6 +28,7 @@ test.beforeEach((t) => {
 
   // uri variables
   const uri = url.parse('https://apps.na.collabserv.com/files/{ authType }/api/feed');
+  const uriAsString = 'https://apps.na.collabserv.com/files/{ authType }/api/feed';
   const uriTemplateCombination = url.parse('https://apps.na.collabserv.com/files/{ authType }/api/{ mockParam }/feed');
 
   const noAuthTypeTemplate = url.parse('https://apps.na.collabserv.com/files/api/feed');
@@ -50,6 +51,7 @@ test.beforeEach((t) => {
     phaseHook,
     valuesMap,
     uri,
+    uriAsString,
     uriTemplateCombination,
     noAuthTypeTemplate,
     wrongTemplateUrl,
@@ -187,6 +189,39 @@ test.cb('validation when {authType} is provided, authType: "basic", valuesMap ma
 
     const { uri: { href: originalPath }, authType } = requestOptions;
     const { uri: { href: modifiedPath } } = ctx.options;
+
+    Object.keys(requestOptions)
+      .forEach(elem => t.true(elem in ctx.options, `${elem} should be a member of modifiedParams`));
+
+    t.not(originalPath, modifiedPath, `original uri path should be different from modified path.
+      original: {${originalPath}}, modified: {${modifiedPath}}`);
+    t.true(modifiedPath.includes(valuesMap.authType[authType]),
+      `${valuesMap.authType[authType]} should be part of modified path. provided: {${modifiedPath}}`);
+    t.end();
+  });
+});
+
+
+test.cb('validation when {authType} is provided, authType: "basic", uri provided as a String', (t) => {
+  const { uriAsString, valuesMap } = t.context;
+  const { onRequest } = formatUrlTemplate({ valuesMap });
+
+  const phaseHook = onRequest[0];
+
+  const requestOptions = {
+    uri: uriAsString,
+    authType: 'basic',
+  };
+
+  const ctx = {
+    options: requestOptions,
+  };
+
+  phaseHook.handler(ctx, (err) => {
+    t.ifError(err);
+
+    const { uri: originalPath, authType } = requestOptions;
+    const { uri: modifiedPath } = ctx.options;
 
     Object.keys(requestOptions)
       .forEach(elem => t.true(elem in ctx.options, `${elem} should be a member of modifiedParams`));
