@@ -23,16 +23,17 @@
     "coverage": "nyc npm run test && nyc report --reporter=html"
   },
   "dependencies": {
-    "lodash": "4.17.4"
+    "debug": "^3.1.0",
+    "lodash": "^4.17.5"
   },
   "devDependencies": {
-    "ava": "0.20.0",
-    "babel-eslint": "7.2.3",
-    "eslint": "3.15.0",
-    "eslint-config-oniyi": "4.4.0",
-    "eslint-plugin-ava": "4.2.1",
-    "jsdoc-to-markdown": "3.0.0",
-    "nyc": "10.3.2"
+    "ava": "^0.25.0",
+    "babel-eslint": "^8.2.1",
+    "eslint": "^4.17.0",
+    "eslint-config-oniyi": "^5.1.0",
+    "eslint-plugin-ava": "^4.5.0",
+    "jsdoc-to-markdown": "^4.0.1",
+    "nyc": "^11.4.1"
   },
   "homepage": "https://github.com/benkroeger/oniyi-http-plugin-format-url-template#readme",
   "directories": {
