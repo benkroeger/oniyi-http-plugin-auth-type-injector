@@ -22,16 +22,13 @@ test.beforeEach((t) => {
   };
 
   const initPlugin = formatUrlTemplate();
-  const { load } = initPlugin;
+  const { onRequest } = initPlugin;
 
-  function getValues(obj) {
-    return Object.keys(obj).map(key => obj[key]);
-  }
+  const phaseHook = onRequest[0];
 
   // uri variables
   const uri = url.parse('https://apps.na.collabserv.com/files/{ authType }/api/feed');
   const uriTemplateCombination = url.parse('https://apps.na.collabserv.com/files/{ authType }/api/{ mockParam }/feed');
-  const uriWithUmlauts = url.parse('https://apps.na.collabserv.com/files/api/label/ä, ö, ü, Ä, Ö, Ü, ß');
 
   const noAuthTypeTemplate = url.parse('https://apps.na.collabserv.com/files/api/feed');
   const wrongTemplateUrl = url.parse('https://apps.na.collabserv.com/files/{ badAuthType }/api/feed');
@@ -50,12 +47,10 @@ test.beforeEach((t) => {
   };
 
   _.assign(t.context, {
-    load,
-    getValues,
+    phaseHook,
     valuesMap,
     uri,
     uriTemplateCombination,
-    uriWithUmlauts,
     noAuthTypeTemplate,
     wrongTemplateUrl,
     qs,
@@ -65,31 +60,47 @@ test.beforeEach((t) => {
 });
 
 /* Metadata test */
-test('validate {formatUrlTemplate} values and type', (t) => {
+test('main module return `name` and `onRequest` props', (t) => {
   t.true(_.isObject(formatUrlTemplate()));
-  const { name, load } = formatUrlTemplate();
+  const { name, onRequest } = formatUrlTemplate();
 
   t.true(_.isString(name));
-  t.true(_.isFunction(load));
+  t.true(_.isArray(onRequest));
 
   t.is(name, 'format-url-template');
-  t.is(load.length, 3, 'there should be 3 arguments in {load} function');
+  t.is(onRequest.length, 1);
+});
+
+test('`onRequest` return `phaseName` and `handler` prop', (t) => {
+  t.true(_.isObject(formatUrlTemplate()));
+  const { onRequest } = formatUrlTemplate();
+  const formatUrlTemplatePhaseHook = onRequest[0];
+  const { phaseName, handler } = formatUrlTemplatePhaseHook;
+  t.is(phaseName, 'format-url-template');
+
+  t.true(_.isFunction(handler));
+  t.is(handler.length, 2);
 });
 
 /* Successful scenarios validations */
 test.cb('validation when { authType } is provided, authType: "basic"', (t) => {
-  const { load, uri } = t.context;
+  const { phaseHook, uri } = t.context;
   const requestOptions = {
     uri,
     authType: 'basic',
   };
-  load(null, requestOptions, (err, modifiedParams) => {
+
+  const ctx = {
+    options: requestOptions,
+  };
+
+  phaseHook.handler(ctx, (err) => {
     t.ifError(err);
     const { uri: { href: originalPath } } = requestOptions;
-    const { uri: { href: modifiedPath } } = modifiedParams;
+    const { uri: { href: modifiedPath } } = ctx.options;
 
     Object.keys(requestOptions)
-      .forEach(elem => t.true(elem in modifiedParams, `${elem} should be a member of modifiedParams`));
+      .forEach(elem => t.true(elem in ctx.options, `${elem} should be a member of modifiedParams`));
 
     t.not(originalPath, modifiedPath, `original uri path should be different from modified path.
       original: {${originalPath}}, modified: {${modifiedPath}}`);
@@ -98,9 +109,30 @@ test.cb('validation when { authType } is provided, authType: "basic"', (t) => {
   });
 });
 
+test.cb('validate skipping of request phase handler', (t) => {
+  const { phaseHook } = t.context;
+  const requestOptions = {
+    phasesToSkip: {
+      requestPhases: ['format-url-template'],
+    },
+  };
+
+  const ctx = {
+    options: requestOptions,
+  };
+
+  phaseHook.handler(ctx, (err) => {
+    t.ifError(err);
+    t.deepEqual(requestOptions, ctx.options);
+    t.end();
+  });
+});
+
 test.cb('validation when {userid2} && {userid3} template provided, multiple "qs" templates provided', (t) => {
   const { uri, valuesMap, multipleQs } = t.context;
-  const { load } = formatUrlTemplate({ valuesMap });
+  const { onRequest } = formatUrlTemplate({ valuesMap });
+
+  const phaseHook = onRequest[0];
 
   const requestOptions = {
     uri,
@@ -115,13 +147,16 @@ test.cb('validation when {userid2} && {userid3} template provided, multiple "qs"
     authType: 'basic',
   };
 
-  load(null, requestOptions, (err, modifiedParams) => {
+  const ctx = {
+    options: requestOptions,
+  };
+
+  phaseHook.handler(ctx, (err) => {
     t.ifError(err);
 
-    const { getValues } = t.context;
-    const { qs } = modifiedParams;
+    const { qs } = ctx.options;
 
-    getValues(multipleQs).forEach((templateValue) => {
+    _.values(multipleQs).forEach((templateValue) => {
       const [, , value] = templateValue.match(regex);
       const mappedValue = requestOptions[value];
       t.true(Object.keys(qs).some(key => qs[key] === mappedValue),
@@ -134,21 +169,27 @@ test.cb('validation when {userid2} && {userid3} template provided, multiple "qs"
 
 test.cb('validation when {authType} is provided, authType: "basic", valuesMap matches requirements', (t) => {
   const { uri, valuesMap } = t.context;
-  const { load } = formatUrlTemplate({ valuesMap });
+  const { onRequest } = formatUrlTemplate({ valuesMap });
+
+  const phaseHook = onRequest[0];
 
   const requestOptions = {
     uri,
     authType: 'basic',
   };
 
-  load(null, requestOptions, (err, modifiedParams) => {
+  const ctx = {
+    options: requestOptions,
+  };
+
+  phaseHook.handler(ctx, (err) => {
     t.ifError(err);
 
     const { uri: { href: originalPath }, authType } = requestOptions;
-    const { uri: { href: modifiedPath } } = modifiedParams;
+    const { uri: { href: modifiedPath } } = ctx.options;
 
     Object.keys(requestOptions)
-      .forEach(elem => t.true(elem in modifiedParams, `${elem} should be a member of modifiedParams`));
+      .forEach(elem => t.true(elem in ctx.options, `${elem} should be a member of modifiedParams`));
 
     t.not(originalPath, modifiedPath, `original uri path should be different from modified path.
       original: {${originalPath}}, modified: {${modifiedPath}}`);
@@ -159,7 +200,7 @@ test.cb('validation when {authType} is provided, authType: "basic", valuesMap ma
 });
 
 test.cb('validation when {authType} && {mockParam} are provided, authType: "oauth"', (t) => {
-  const { load, uriTemplateCombination } = t.context;
+  const { phaseHook, uriTemplateCombination } = t.context;
 
   const requestOptions = {
     uri: uriTemplateCombination,
@@ -167,13 +208,17 @@ test.cb('validation when {authType} && {mockParam} are provided, authType: "oaut
     mockParam: 'customPath',
   };
 
-  load(null, requestOptions, (err, modifiedParams) => {
+  const ctx = {
+    options: requestOptions,
+  };
+
+  phaseHook.handler(ctx, (err) => {
     t.ifError(err);
     const { uri: { href: originalPath }, authType, mockParam } = requestOptions;
-    const { uri: { href: modifiedPath } } = modifiedParams;
+    const { uri: { href: modifiedPath } } = ctx.options;
 
     Object.keys(requestOptions)
-      .forEach(elem => t.true(elem in modifiedParams, `${elem} should be a member of modifiedParams`));
+      .forEach(elem => t.true(elem in ctx.options, `${elem} should be a member of modifiedParams`));
 
     t.not(originalPath, modifiedPath, `original uri path should be different from modified path.
       original: {${originalPath}}, modified: {${modifiedPath}}`);
@@ -186,7 +231,7 @@ test.cb('validation when {authType} && {mockParam} are provided, authType: "oaut
 });
 
 test.cb('validation when "applyToUrl" is set to false, "applyToQueryString" is set to true', (t) => {
-  const { load, uri, qs: qsOriginal } = t.context;
+  const { phaseHook, uri, qs: qsOriginal } = t.context;
   const requestOptions = {
     uri,
     qs: qsOriginal,
@@ -199,11 +244,16 @@ test.cb('validation when "applyToUrl" is set to false, "applyToQueryString" is s
     authType: 'oauth',
     mockParam: 'customQsPath',
   };
-  load(null, requestOptions, (err, modifiedParams) => {
+
+  const ctx = {
+    options: requestOptions,
+  };
+
+  phaseHook.handler(ctx, (err) => {
     t.ifError(err);
 
     const { uri: { href: originalPath }, mockParam } = requestOptions;
-    const { uri: { href: modifiedPath }, qs } = modifiedParams;
+    const { uri: { href: modifiedPath }, qs } = ctx.options;
 
     t.is(originalPath, modifiedPath, `original uri path should not be different from modified path.
       original: {${originalPath}}, modified: {${modifiedPath}}`);
@@ -214,18 +264,24 @@ test.cb('validation when "applyToUrl" is set to false, "applyToQueryString" is s
 
 test.cb('validation when "applyToUrl" is set via "pluginOptions"', (t) => {
   const { uri } = t.context;
-  const { load } = formatUrlTemplate({
-    applyToUrl: false,
-  });
+  const { onRequest } = formatUrlTemplate({ applyToUrl: false });
+
+  const phaseHook = onRequest[0];
+
   const requestOptions = {
     uri,
     authType: 'oauth',
   };
-  load(null, requestOptions, (err, modifiedParams) => {
+
+  const ctx = {
+    options: requestOptions,
+  };
+
+  phaseHook.handler(ctx, (err) => {
     t.ifError(err);
 
     const { uri: { href: originalPath }, authType } = requestOptions;
-    const { uri: { href: modifiedPath } } = modifiedParams;
+    const { uri: { href: modifiedPath } } = ctx.options;
 
     t.is(originalPath, modifiedPath, `original uri path should not be different from modified path.
       original: {${originalPath}}, modified: {${modifiedPath}}`);
@@ -237,11 +293,13 @@ test.cb('validation when "applyToUrl" is set via "pluginOptions"', (t) => {
 
 test.cb('validation when "applyToUrl" is set via both "pluginOptions" and "requestOptions"', (t) => {
   const { uri } = t.context;
-  const { load } = formatUrlTemplate({
+  const { onRequest } = formatUrlTemplate({
     formatUrlTemplate: {
       applyToUrl: false,
     },
   });
+
+  const phaseHook = onRequest[0];
 
   // 'applyToUrl' set via requestOptions should have advantage over the initialized one
   const requestOptions = {
@@ -254,11 +312,15 @@ test.cb('validation when "applyToUrl" is set via both "pluginOptions" and "reque
     authType: 'oauth',
   };
 
-  load(null, requestOptions, (err, modifiedParams) => {
+  const ctx = {
+    options: requestOptions,
+  };
+
+  phaseHook.handler(ctx, (err) => {
     t.ifError(err);
 
     const { uri: { href: originalPath }, authType } = requestOptions;
-    const { uri: { href: modifiedPath } } = modifiedParams;
+    const { uri: { href: modifiedPath } } = ctx.options;
 
     t.not(originalPath, modifiedPath, `original uri path should be different from modified path.
       original: {${originalPath}}, modified: {${modifiedPath}}`);
@@ -272,19 +334,24 @@ test.cb('validation when "applyToUrl" is set via both "pluginOptions" and "reque
 /* Error / Wrong input scenarios validations */
 
 test.cb('validation when { authType } is not provided in url template, authType: "basic"', (t) => {
-  const { load, noAuthTypeTemplate: uri } = t.context;
+  const { phaseHook, noAuthTypeTemplate: uri } = t.context;
   const requestOptions = {
     uri,
     authType: 'basic',
   };
-  load(null, requestOptions, (err, modifiedParams) => {
+
+  const ctx = {
+    options: requestOptions,
+  };
+
+  phaseHook.handler(ctx, (err) => {
     t.ifError(err);
 
     const { uri: { href: originalPath } } = requestOptions;
-    const { uri: { href: modifiedPath } } = modifiedParams;
+    const { uri: { href: modifiedPath } } = ctx.options;
 
     Object.keys(requestOptions)
-      .forEach(elem => t.true(elem in modifiedParams, `${elem} should be a member of modifiedParams`));
+      .forEach(elem => t.true(elem in ctx.options, `${elem} should be a member of modifiedParams`));
     t.is(originalPath, modifiedPath, `original uri path should not be different from modified path.
       original: {${originalPath}}, modified: {${modifiedPath}}`);
     t.false(modifiedPath.includes('basic'),
@@ -294,19 +361,24 @@ test.cb('validation when { authType } is not provided in url template, authType:
 });
 
 test.cb('validation when wrong { authType } is provided as url template, authType: "basic"', (t) => {
-  const { load, wrongTemplateUrl: uri } = t.context;
+  const { phaseHook, wrongTemplateUrl: uri } = t.context;
   const requestOptions = {
     uri,
     authType: 'basic',
   };
-  load(null, requestOptions, (err, modifiedParams) => {
+
+  const ctx = {
+    options: requestOptions,
+  };
+
+  phaseHook.handler(ctx, (err) => {
     t.ifError(err);
 
     const { uri: { href: originalPath } } = requestOptions;
-    const { uri: { href: modifiedPath } } = modifiedParams;
+    const { uri: { href: modifiedPath } } = ctx.options;
 
     Object.keys(requestOptions)
-      .forEach(elem => t.true(elem in modifiedParams, `${elem} should be a member of modifiedParams`));
+      .forEach(elem => t.true(elem in ctx.options, `${elem} should be a member of modifiedParams`));
 
     t.is(originalPath, modifiedPath, `original uri path should not be different from modified path.
       original: {${originalPath}}, modified: {${modifiedPath}}`);
@@ -317,7 +389,7 @@ test.cb('validation when wrong { authType } is provided as url template, authTyp
 });
 
 test.cb('validation when no "qs" template is provided', (t) => {
-  const { load, uri, qsNoTemplate } = t.context;
+  const { phaseHook, uri, qsNoTemplate } = t.context;
   const requestOptions = {
     uri,
     plugins: {
@@ -328,11 +400,16 @@ test.cb('validation when no "qs" template is provided', (t) => {
     qs: qsNoTemplate,
     mockTemplate: 'mockMappedTemplate',
   };
-  load(null, requestOptions, (err, modifiedParams) => {
+
+  const ctx = {
+    options: requestOptions,
+  };
+
+  phaseHook.handler(ctx, (err) => {
     t.ifError(err);
 
     const { qs: originalQs } = requestOptions;
-    const { qs: modifiedQs } = modifiedParams;
+    const { qs: modifiedQs } = ctx.options;
 
     t.deepEqual(originalQs, modifiedQs, `original query string should be different from modified query string.
       original: {${originalQs.userid}}, modified: {${modifiedQs.userid}}`);
@@ -341,7 +418,7 @@ test.cb('validation when no "qs" template is provided', (t) => {
 });
 
 test.cb('validation when wrong "qs" template is provided', (t) => {
-  const { load, uri, qs } = t.context;
+  const { phaseHook, uri, qs } = t.context;
   const requestOptions = {
     uri,
     qs,
@@ -352,11 +429,16 @@ test.cb('validation when wrong "qs" template is provided', (t) => {
     },
     wrongQsTemplate: 'mockTemplate',
   };
-  load(null, requestOptions, (err, modifiedParams) => {
+
+  const ctx = {
+    options: requestOptions,
+  };
+
+  phaseHook.handler(ctx, (err) => {
     t.ifError(err);
 
     const { qs: originalQs } = requestOptions;
-    const { qs: modifiedQs } = modifiedParams;
+    const { qs: modifiedQs } = ctx.options;
     t.deepEqual(originalQs, modifiedQs, `original query string should be different from modified query string.
       original: {${originalQs.userid}}, modified: {${modifiedQs.userid}}`);
     t.end();
@@ -364,7 +446,7 @@ test.cb('validation when wrong "qs" template is provided', (t) => {
 });
 
 test.cb('validation when "applyToUrl" is set to false', (t) => {
-  const { load, uri } = t.context;
+  const { phaseHook, uri } = t.context;
   const requestOptions = {
     uri,
     plugins: {
@@ -374,11 +456,16 @@ test.cb('validation when "applyToUrl" is set to false', (t) => {
     },
     authType: 'oauth',
   };
-  load(null, requestOptions, (err, modifiedParams) => {
+
+  const ctx = {
+    options: requestOptions,
+  };
+
+  phaseHook.handler(ctx, (err) => {
     t.ifError(err);
 
     const { uri: { href: originalPath } } = requestOptions;
-    const { uri: { href: modifiedPath } } = modifiedParams;
+    const { uri: { href: modifiedPath } } = ctx.options;
 
     t.is(originalPath, modifiedPath, `original uri path should not be different from modified path.
       original: {${originalPath}}, modified: {${modifiedPath}}`);
@@ -388,17 +475,21 @@ test.cb('validation when "applyToUrl" is set to false', (t) => {
 });
 
 test.cb('validate when "authType" provided with an empty string', (t) => {
-  const { load, uri } = t.context;
+  const { phaseHook, uri } = t.context;
   const requestOptions = {
     uri,
     authType: '',
   };
 
-  load(null, requestOptions, (err, modifiedParams) => {
+  const ctx = {
+    options: requestOptions,
+  };
+
+  phaseHook.handler(ctx, (err) => {
     t.ifError(err);
 
     const { uri: { href: originalPath } } = requestOptions;
-    const { uri: { href: modifiedPath } } = modifiedParams;
+    const { uri: { href: modifiedPath } } = ctx.options;
 
     t.not(originalPath, modifiedPath, `original uri path should be different from modified path.
       original: {${originalPath}}, modified: {${modifiedPath}}`);
@@ -411,41 +502,26 @@ test.cb('validate when "authType" provided with an empty string', (t) => {
 });
 
 test.cb('validate when "authType" is equal to undefined / not present', (t) => {
-  const { load, uri } = t.context;
+  const { phaseHook, uri } = t.context;
   const requestOptions = {
     uri,
     authType: undefined,
   };
 
-  load(null, requestOptions, (err, modifiedParams) => {
+  const ctx = {
+    options: requestOptions,
+  };
+
+  phaseHook.handler(ctx, (err) => {
     t.ifError(err);
 
     const { uri: { href: originalPath } } = requestOptions;
-    const { uri: { href: modifiedPath } } = modifiedParams;
+    const { uri: { href: modifiedPath } } = ctx.options;
 
     t.is(originalPath, modifiedPath, `original uri path should not be different from modified path.
       original: {${originalPath}}, modified: {${modifiedPath}}`);
     t.true(modifiedPath.includes('authType'),
       `modified path: {${modifiedPath}} should contain "authType" when authType param is undefined / not provided`);
-    t.end();
-  });
-});
-test.cb('validate when url contains German special characters', (t) => {
-  const { load, uriWithUmlauts } = t.context;
-  const requestOptions = {
-    uri: uriWithUmlauts,
-    authType: '',
-  };
-
-  load(null, requestOptions, (err, modifiedParams) => {
-    t.ifError(err);
-
-    const { uri: { href: originalPath } } = requestOptions;
-    const { uri: { href: modifiedPath } } = modifiedParams;
-
-    const encodedOriginalPath = encodeURI(decodeURI(originalPath));
-    t.is(encodedOriginalPath, modifiedPath, `encoded original uri path should not be different from modified path.
-      original: {${encodedOriginalPath}}, modified: {${modifiedPath}}`);
     t.end();
   });
 });
