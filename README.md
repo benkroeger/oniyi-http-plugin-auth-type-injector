@@ -12,8 +12,9 @@ $ npm install --save oniyi-http-plugin-format-url-template
 const OniyiHttpClient = require('oniyi-http-client');
 const oniyiHttpPluginUrlTemplate = require('oniyi-http-plugin-format-url-template');
 
-const clientOptions = {};
-const httpClient = new OniyiHttpClient(clientOptions);
+const options = {
+  requestPhases: ['format-url-template'], // indicates that we want phase hook handler with name 'format-url-template' should be run in request phase list
+};
 
 const pluginOptions = {
   valuesMap: {
@@ -24,7 +25,11 @@ const pluginOptions = {
   applyToQueryString: true,
 };
 
-httpClient.use(oniyiHttpPluginUrlTemplate(pluginOptions));
+const plugin = oniyiHttpPluginUrlTemplate(pluginOptions);
+
+const httpClient = OniyiHttpClient
+  .create(options) // create custom http client with defined phases lists
+  .use(plugin);    // mount a plugin
 ```
 
 These are the default plugin options, they can be overridden as shown above (merged deeply)
@@ -43,6 +48,7 @@ const defaultPluginOptions = {
   },
 };
 ```
+This plugin relies on logic implemented in [oniyi-http-client](https://npmjs.org/package/oniyi-http-client), which has extensive documentation on how phase lists work and what conventions must be followed when implementing a plugin.
 
 ## Conventions
 
@@ -97,7 +103,7 @@ const pluginOptions = {
   applyToUrl: false,
 };
 
-httpClient.use(oniyiHttpPluginAuthType(pluginOptions));
+httpClient.use(oniyiHttpPluginUrlTemplate(pluginOptions));
 ```
 
    2. When configuring http request:
@@ -139,30 +145,56 @@ const requestOptions = {
 
    -- **convention 4** --
 
-It is recommended to use this plugin in combination with `oniyi-http-plugin-credentials`, since it resolves `authType`
+It is recommended to use this plugin in combination with [oniyi-http-plugin-credentials](https://npmjs.org/package/oniyi-http-plugin-credentials), since it resolves `authType`
 which is being used by this plugin.
 
 Otherwise, `authType` need to be added manually into `requestOptions`.
 ```js
 const requestOptions = {
   authType: 'basic',
-    uri: 'my/custom/{ wrongAuthType }/path',
+    uri: 'my/custom/{ authType }/path',
   //...
   }
 ```
 
-If `conventions 1 && 2` have not been implemented properly, plugin will leave `url` object with _encoded_ special
-characters / tags as follows:
+   -- **convention 5** --
+
+Please provide uri parameter as a String or Url object:
+```js
+const uriAsString = 'my/custom/authType }/path';
+const parsedUri = {
+  auth: null,
+  hash: null,
+  host:'host.com',
+  hostname: 'host.com',
+  href:'host.com/my/custom/{ authType/path',
+  path:'/my/custom/path',
+  pathname:'/my/custom/path',
+  port: null,
+  protocol:'https:',
+  query: null,
+  search: null,
+  slashes: true,
+}
 ```
+
+If `conventions 1 && 2` have not been implemented properly, response uri will look like this:
+
+```
+// uri as string request
+{
+  uri: 'my/custom/authType }/path',
+}
+// uri as parsed object
 {
   uri: {
     auth: null,
     hash: null,
     host:'host.com',
     hostname: 'host.com',
-    href:'host.com/my/custom/%7B%20wrongAuthType%20%7D/path',
-    path:'/my/custom/%7B%20wrongAuthType%20%7D/path',
-    pathname:'/my/custom/%7B%20wrongAuthType%20%7D/path',
+    href:'host.com/my/custom/%7B%20authType/path',
+    path:'/my/custom/%7B%20authType/path',
+    pathname:'/my/custom/%7B%20authType/path',
     port: null,
     protocol:'https:',
     query: null,
@@ -170,7 +202,10 @@ characters / tags as follows:
     slashes: true,
   },
 }
+
 ```
+The reason why `uriAsString` response is not encoded as `parsedUri` is because plugin takes `href` prop from `parsedUri`, 
+uses `url.parse(href);` which encodes all special characters that are used in the href path.
 
 This way plugin is notifying service that something went wrong while setting up, most likely because of a typo.
 
@@ -185,20 +220,7 @@ const requestOptions = {
   //...
 
 const httpResponse = {
-  uri: {
-    auth: null,
-    hash: null,
-    host:'host.com',
-    hostname: 'host.com',
-    href:'host.com/my/custom/path',
-    path:'/my/custom/path',
-    pathname:'/my/custom/path',
-    port: null,
-    protocol:'https:',
-    query: null,
-    search: null,
-    slashes: true,
-  },
+  uri: 'my/custom/path',
 }
 ```
 
@@ -216,4 +238,4 @@ The reason why `qs` response is not encoded as `uri` is because plugin uses `url
 all special characters that are used in the uri string.
 
 This way it should be relatively simple injecting any parameter into service `uri / qs` path, in order to load the same
-service by different auth providers (ibm-connections-cloud, microsoft...) by using custom template mapping.
+service with different auth providers (ibm-connections-cloud, microsoft...) by using custom template mapping.
