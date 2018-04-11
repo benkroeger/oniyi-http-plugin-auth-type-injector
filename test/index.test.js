@@ -111,25 +111,6 @@ test.cb('validation when { authType } is provided, authType: "basic"', (t) => {
   });
 });
 
-test.cb('validate skipping of request phase handler', (t) => {
-  const { phaseHook } = t.context;
-  const requestOptions = {
-    phasesToSkip: {
-      requestPhases: ['format-url-template'],
-    },
-  };
-
-  const ctx = {
-    options: requestOptions,
-  };
-
-  phaseHook.handler(ctx, (err) => {
-    t.ifError(err);
-    t.deepEqual(requestOptions, ctx.options);
-    t.end();
-  });
-});
-
 test.cb('validation when {userid2} && {userid3} template provided, multiple "qs" templates provided', (t) => {
   const { uri, valuesMap, multipleQs } = t.context;
   const { onRequest } = formatUrlTemplate({ valuesMap });
