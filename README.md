@@ -13,7 +13,7 @@ const OniyiHttpClient = require('oniyi-http-client');
 const oniyiHttpPluginUrlTemplate = require('oniyi-http-plugin-format-url-template');
 
 const options = {
-  requestPhases: ['format-url-template'], // indicates that we want phase hook handler with name 'format-url-template' should be run in request phase list
+  requestPhases: ['initial','format-url-template', 'final'],
 };
 
 const pluginOptions = {
@@ -26,10 +26,18 @@ const pluginOptions = {
 };
 
 const plugin = oniyiHttpPluginUrlTemplate(pluginOptions);
+const phaseMapOptions = {
+  requestPhaseMap: {
+    'format-url-template': 'url-template',
+  },
+  responsePhaseMap: {
+    final: 'end',
+  },
+};
 
 const httpClient = OniyiHttpClient
-  .create(options) // create custom http client with defined phases lists
-  .use(plugin);    // mount a plugin
+  .create(options)                // create custom http client with defined phases lists
+  .use(plugin, phaseMapOptions);  // mount a plugin
 ```
 
 These are the default plugin options, they can be overridden as shown above (merged deeply)
